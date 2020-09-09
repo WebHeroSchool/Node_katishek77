@@ -1,23 +1,33 @@
 const path = require('path');
 const fs = require('fs');
 
-const content = fs.readFileSync("file1.txt");
-let words = content.toString().replace(/\r\n/g, ' ').split(' ');
+function contentDiff(filename) {
+    const content = fs.readFileSync(filename);
+    let words = content.toString().replace(/\r\n/g, ' ').split(' ');
+    return (words);
+}
+
+let words1 = contentDiff(path.resolve("file1.txt"));
 
 fs.watchFile(path.resolve('file1.txt'), (ev) => {
-    const contentNew = fs.readFileSync("file1.txt");
-    let wordsNew = contentNew.toString().replace(/\r\n/g, ' ').split(' ');
+    let words2 = contentDiff(path.resolve("file1.txt"));
 
-    if (words.length < wordsNew.length) {
+    if (words1.length <= words2.length) {
         console.log('Файл изменился');
-        for (let i = 0; i < wordsNew.length; i++) {
-            if (words[i] !== wordsNew[i]) {
-                console.log(wordsNew[i]);
+        for (let i = 0; i < words2.length; i++) {
+            if (words1[i] !== words2[i] && words2[i] !== '') {
+                console.log(words2[i]);
+            } else if (words1[i] !== words2[i] && words2[i] === '') {
+                console.log(words2[i] + 'пусто');
             }
         }
-        words = wordsNew;
-    } else if (words.length > wordsNew.length) {
+    }
+    else if (words1.length > words2.length) {
         console.log('Файл изменился, что-то удалили');
-        console.log(wordsNew);
-    } words = wordsNew;
+        console.log(words2);
+    }
+    words1 = words2;
 });
+/* У меня сравнение по словам, а не по строкам.
+Нужно именно построчно сравнивать?
+ */
